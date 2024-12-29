@@ -26,12 +26,10 @@ class ScoreManager {
     // Subscribe to score updates
     func subscribe(listener: @escaping (Int) -> Void) {
         listeners.append(listener)
-        print("Listener subscribed. Total listeners: \(listeners.count)") // Debug log
         listener(score) // Immediately notify the new listener with the current score
     }
 
     private func notifyListeners() {
-        print("Notifying \(listeners.count) listeners with score: \(score)") // Debug log
         listeners.forEach { $0(score) }
     }
 }

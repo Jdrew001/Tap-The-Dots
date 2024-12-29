@@ -12,13 +12,6 @@ class BulletEntity: Entity {
         bulletNode.glowWidth = 5
         bulletNode.blendMode = .add
         bulletNode.position = position
-        bulletNode.physicsBody = SKPhysicsBody(circleOfRadius: 5)
-        bulletNode.physicsBody?.isDynamic = true
-        bulletNode.physicsBody?.affectedByGravity = false
-        bulletNode.physicsBody?.categoryBitMask = PhysicsCategory.Bullet
-        bulletNode.physicsBody?.contactTestBitMask = PhysicsCategory.Player
-        bulletNode.physicsBody?.collisionBitMask = PhysicsCategory.None
-        bulletNode.physicsBody?.usesPreciseCollisionDetection = true
         
         // Add pulsing animation to the square
         let pulseUp = SKAction.scale(to: 1.2, duration: 0.5)

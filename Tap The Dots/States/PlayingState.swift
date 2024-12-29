@@ -11,7 +11,6 @@ import SpriteKit
 class PlayingState: GameState {
     
     func enter(view: SKView) {
-        print("Entering Playing State")
         SceneManager.transition(to: GameScene(size: view.bounds.size), in: view)
     }
     
@@ -19,6 +18,5 @@ class PlayingState: GameState {
     }
     
     func exit() {
-        print("Exiting Playing State")
     }
 }

@@ -4,10 +4,11 @@ class ShooterComponent: Component {
     var entity: Entity?
     private var shootTimer: TimeInterval = 0
     private var bullets: [BulletEntity] = []
+    weak var spawnManager: SpawnManager?
 
     func update(deltaTime: TimeInterval) {
         shootTimer += deltaTime
-        if shootTimer > 1.5 { // Shoot every 1.5 seconds
+        if shootTimer > 4 { // Shoot every 1.5 seconds
             shoot()
             shootTimer = 0
         }
@@ -35,7 +36,6 @@ class ShooterComponent: Component {
 
         // Check if the shooter is off-screen
         if isOffScreen(node: renderComponent.node, in: scene) {
-            print("Shooter is off-screen, skipping shoot")
             return
         }
 
@@ -47,12 +47,9 @@ class ShooterComponent: Component {
         let bullet = BulletEntity(scene: scene,
                                   position: renderComponent.node.position,
                                   target: targetPosition)
-
-        // Add bullet to the scene and track it
-//        if let renderComponent = bullet.getComponent(ofType: RenderComponent.self) {
-//            scene.addChild(renderComponent.node)
-//        }
+        
         bullets.append(bullet)
+        spawnManager?.notifyBulletSpawn(from: renderComponent.node.position, to: targetPosition, bullet: bullet)
     }
 
     private func isOffScreen(node: SKNode, in scene: SKScene) -> Bool {

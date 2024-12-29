@@ -18,17 +18,14 @@ class ScoreComponent: Component {
 
     func attachTo(scene: SKScene) {
         scene.addChild(labelNode)
-        print("ScoreComponent label added to scene") // Debug log
 
         // Subscribe to ScoreManager updates
         ScoreManager.shared.subscribe { newScore in
-            print("Listener received new score: \(newScore)") // Debug log
             self.updateScore(to: newScore)
         }
     }
 
     private func updateScore(to newScore: Int) {
-        print("ScoreComponent received update: \(newScore)") // Debug log
 
         DispatchQueue.main.async {
             self.labelNode.text = "Score: \(newScore)"

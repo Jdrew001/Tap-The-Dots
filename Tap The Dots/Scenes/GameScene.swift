@@ -8,6 +8,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var fastMoverEnemies: [FastMoverEnemyEntity] = []
     var bullets: [BulletEntity] = []
     var spawnManager: SpawnManager!
+    private var healthBar: SKShapeNode!
     private var lastUpdateTime: TimeInterval = 0
     private var elapsedTime: TimeInterval = 0
     private var difficultyFactor: CGFloat = 1.0
@@ -21,6 +22,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         setupScoreComponent()
         setupSpawnManager()
         scheduleScoreUpdates()
+        
+        EventManager.shared.subscribe(event: "bulletSpawned") {
+            self.handleCollisions()
+        }
     }
 
     // MARK: - Input Handling
@@ -52,6 +57,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.addComponent(CollisionComponent(size: CGSize(width: 40, height: 40)) { [weak self] _ in
             self?.gameOver()
         })
+        
+        // Health Bar
+        let barWidth: CGFloat = 100
+        let barHeight: CGFloat = 10
+        healthBar = SKShapeNode(rectOf: CGSize(width: barWidth, height: barHeight), cornerRadius: 5)
+        healthBar.fillColor = .green
+        healthBar.strokeColor = .clear
+        healthBar.position = CGPoint(x: size.width / 2, y: size.height - 30)
+        healthBar.zPosition = 1
+        addChild(healthBar)
+    }
+    
+    private func updateHealthBar() {
+        let barWidth: CGFloat = 100
+        let healthRatio = CGFloat(player.health) / CGFloat(player.maxHealth)
+        healthBar.xScale = healthRatio
+
+        if healthRatio > 0.5 {
+            healthBar.fillColor = .green
+        } else if healthRatio > 0.2 {
+            healthBar.fillColor = .yellow
+        } else {
+            healthBar.fillColor = .red
+        }
     }
 
     private func setupScoreComponent() {
@@ -185,7 +214,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for obstacle in obstacles {
             if let obstacleCollision = obstacle.getComponent(ofType: CollisionComponent.self),
                playerCollision.checkCollision(with: obstacleCollision) {
-                gameOver()
+                player.takeDamage()
+                updateHealthBar()
+                if !player.isAlive() {
+                    gameOver()
+                }
                 return
             }
         }
@@ -193,7 +226,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for shooter in shootingEnemies {
             if let shooterCollision = shooter.getComponent(ofType: CollisionComponent.self),
                playerCollision.checkCollision(with: shooterCollision) {
-                gameOver()
+                player.takeDamage()
+                updateHealthBar()
+                if !player.isAlive() {
+                    gameOver()
+                }
                 return
             }
         }
@@ -201,15 +238,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for fastMover in fastMoverEnemies {
             if let fastMoverCollision = fastMover.getComponent(ofType: CollisionComponent.self),
                playerCollision.checkCollision(with: fastMoverCollision) {
-                gameOver()
+                player.takeDamage()
+                updateHealthBar()
+                if !player.isAlive() {
+                    gameOver()
+                }
                 return
             }
         }
 
         for bullet in bullets {
+            print(bullet)
             if let bulletCollision = bullet.getComponent(ofType: CollisionComponent.self),
                playerCollision.checkCollision(with: bulletCollision) {
-                gameOver()
+                player.takeDamage()
+                updateHealthBar()
+                if !player.isAlive() {
+                    gameOver()
+                }
                 return
             }
         }
@@ -235,11 +281,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         guard let movementComponent = player.getComponent(ofType: MovementComponent.self) else { return }
 
         switch event.keyCode {
-        case 0: movementComponent.applyInput(direction: CGVector(dx: -1, dy: 0)) // 'A' Key
-        case 2: movementComponent.applyInput(direction: CGVector(dx: 1, dy: 0))  // 'D' Key
-        case 1: movementComponent.applyInput(direction: CGVector(dx: 0, dy: -1)) // 'S' Key
-        case 13: movementComponent.applyInput(direction: CGVector(dx: 0, dy: 1)) // 'W' Key
-        default: break
+            case 0: movementComponent.applyInput(direction: CGVector(dx: -1, dy: 0)) // 'A' Key
+            case 2: movementComponent.applyInput(direction: CGVector(dx: 1, dy: 0))  // 'D' Key
+            case 1: movementComponent.applyInput(direction: CGVector(dx: 0, dy: -1)) // 'S' Key
+            case 13: movementComponent.applyInput(direction: CGVector(dx: 0, dy: 1)) // 'W' Key
+            default: break
         }
     }
 

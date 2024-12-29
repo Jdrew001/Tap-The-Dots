@@ -1,7 +1,13 @@
 import SpriteKit
 
 class PlayerEntity: Entity {
-    init(scene: SKScene, acceleration: CGFloat, friction: CGFloat) {
+    var health: Int
+    let maxHealth: Int
+    private var isInvincible: Bool = false
+    
+    init(scene: SKScene, acceleration: CGFloat, friction: CGFloat, maxHealth: Int = 3) {
+        self.health = maxHealth
+        self.maxHealth = maxHealth
         super.init()
         
         // Calculate the size of the triangle
@@ -33,5 +39,37 @@ class PlayerEntity: Entity {
         
         // Create and add the movement component
         addComponent(MovementComponent(acceleration: acceleration, friction: friction))
+    }
+    
+    func takeDamage() {
+        guard !isInvincible else { return } // Ignore damage if invincible
+        health -= 1
+        flashPlayer()
+    }
+
+    func isAlive() -> Bool {
+        return health > 0
+    }
+    
+    private func flashPlayer() {
+        guard let renderComponent = getComponent(ofType: RenderComponent.self) else { return }
+        let node = renderComponent.node
+
+        // Set the invincible state before starting the flash effect
+        isInvincible = true
+
+        let flashAction = SKAction.sequence([
+            SKAction.fadeAlpha(to: 0.3, duration: 0.3),
+            SKAction.fadeAlpha(to: 1.0, duration: 0.3)
+        ])
+        
+        // Run the flash effect and reset invincibility at the end
+        let invincibilitySequence = SKAction.sequence([
+            SKAction.repeat(flashAction, count: 3),
+            SKAction.run { [weak self] in
+                self?.isInvincible = false
+            }
+        ])
+        node.run(invincibilitySequence)
     }
 }

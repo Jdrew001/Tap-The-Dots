@@ -11,7 +11,7 @@ class SpawnManager {
     private let difficultyFactor: CGFloat
 
     private var spawnDelayTimer: TimeInterval = 0 // New spawn delay timer
-    private let initialSpawnDelay: TimeInterval = 2.0 // Delay time before spawning
+    private let initialSpawnDelay: TimeInterval = 2.5 // Delay time before spawning
 
     init(scene: SKScene, difficultyFactor: CGFloat = 1.0) {
         self.scene = scene
@@ -73,7 +73,8 @@ class SpawnManager {
             let obstacle = spawnObstacle(in: scene)
             delegate?.didSpawnObstacle(obstacle)
         case "Shooter":
-            let speedMultiplier: CGFloat = CGFloat.random(in: 1.0...(CGFloat(currentSettings.currentPhase!) * 1.5))
+            let baseSpeedMultiplier: CGFloat = 0.5 // Reduce the base speed
+            let speedMultiplier: CGFloat = CGFloat.random(in: baseSpeedMultiplier...(baseSpeedMultiplier + (CGFloat(currentSettings.currentPhase!) * 0.5)))
             let shooter = spawnShootingEnemy(in: scene, speedMultiplier: speedMultiplier)
             delegate?.didSpawnShootingEnemy(shooter)
         case "FastMover":
@@ -82,6 +83,10 @@ class SpawnManager {
         default:
             break
         }
+    }
+    
+    func notifyBulletSpawn(from position: CGPoint, to target: CGPoint, bullet: BulletEntity) {
+        delegate?.didSpawnBullet(bullet) // Notify delegate about the spawned bullet
     }
 
     private func spawnObstacle(in scene: SKScene) -> ObstacleEntity {
@@ -92,6 +97,10 @@ class SpawnManager {
 
     private func spawnShootingEnemy(in scene: SKScene, speedMultiplier: CGFloat) -> ShootingEnemyEntity {
         let shooter = ShootingEnemyEntity(scene: scene, difficultyFactor: difficultyFactor * speedMultiplier)
+        // Assign the SpawnManager to the ShooterComponent
+        if let shooterComponent = shooter.getComponent(ofType: ShooterComponent.self) {
+            shooterComponent.spawnManager = self // Assign SpawnManager
+        }
         return shooter
     }
 

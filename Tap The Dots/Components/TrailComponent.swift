@@ -26,7 +26,7 @@ class TrailComponent: Component {
             trail.particleColorBlendFactor = 1.0
 
             // Align trail to the bottom center of the entity
-            trail.position = CGPoint(x: 0, y: -size.height / 2)
+            trail.position = CGPoint(x: 0, y: size.height / 2)
 
             // Adjust particle properties for smooth and dynamic trails
             trail.particleLifetime = 1.2

@@ -16,17 +16,17 @@ class PhaseManager {
     func getSettings(for phase: Int) -> PhaseSettings {
         switch phase {
         case 1:
-            return PhaseSettings(currentPhase: phase, obstacleSpeed: 200, enemyTypes: ["Basic"])
+            return PhaseSettings(currentPhase: phase, obstacleSpeed: 200, enemyTypes: ["Shooter"])
         case 2:
             return PhaseSettings(currentPhase: phase, obstacleSpeed: 300, enemyTypes: ["FastMover"])
         case 3:
             return PhaseSettings(currentPhase: phase, obstacleSpeed: 400, enemyTypes: ["Basic", "FastMover"])
         case 4:
-            return PhaseSettings(currentPhase: phase, obstacleSpeed: 600, enemyTypes: ["Shooter", "FastMover"])
+            return PhaseSettings(currentPhase: phase, obstacleSpeed: 300, enemyTypes: ["Shooter"])
         case 5:
-            return PhaseSettings(currentPhase: phase, obstacleSpeed: 300, enemyTypes: ["Basic", "Shooter", "FastMover"])
+            return PhaseSettings(currentPhase: phase, obstacleSpeed: 475, enemyTypes: ["FastMover"])
         case 6:
-            return PhaseSettings(currentPhase: phase, obstacleSpeed: 700, enemyTypes: ["Shooter"])
+            return PhaseSettings(currentPhase: phase, obstacleSpeed: 350, enemyTypes: ["Shooter"])
         default:
             return PhaseSettings(currentPhase: phase, obstacleSpeed: 200, enemyTypes: ["Basic"])
         }
@@ -38,7 +38,6 @@ class PhaseManager {
         if elapsedTime > 30 && currentPhase < 7 { // Example: Change phase every 30 seconds
             currentPhase += 1
             elapsedTime = 0 // Reset timer for the next phase
-            print("Phase advanced to \(currentPhase)")
         }
     }
     
