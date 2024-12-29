@@ -44,6 +44,9 @@ class PlayerEntity: Entity {
     func takeDamage() {
         guard !isInvincible else { return } // Ignore damage if invincible
         health -= 1
+        if let scene = getComponent(ofType: RenderComponent.self)?.node.scene as? GameScene {
+            scene.shakeScreen(duration: 0.5, intensity: 15)
+        }
         flashPlayer()
     }
 

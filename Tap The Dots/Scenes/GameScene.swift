@@ -13,6 +13,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var elapsedTime: TimeInterval = 0
     private var difficultyFactor: CGFloat = 1.0
     private var lastPhase = 0
+    private var cameraNode: SKCameraNode!
 
     // MARK: - Scene Lifecycle
     override func didMove(to view: SKView) {
@@ -22,6 +23,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         setupScoreComponent()
         setupSpawnManager()
         scheduleScoreUpdates()
+        setupCamera() // Add this
         
         EventManager.shared.subscribe(event: "bulletSpawned") {
             self.handleCollisions()
@@ -111,6 +113,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             lastPhase = currentPhase
             spawnManager.resetSpawnDelay()
         }
+    }
+    
+    private func setupCamera() {
+        cameraNode = SKCameraNode()
+        self.camera = cameraNode
+        addChild(cameraNode)
+        cameraNode.position = CGPoint(x: size.width / 2, y: size.height / 2)
     }
 
     // MARK: - Entity Updates
@@ -311,5 +320,26 @@ extension GameScene: SpawnManagerDelegate {
 
     func didSpawnFastMoverEnemy(_ fastMoverEnemy: FastMoverEnemyEntity) {
         fastMoverEnemies.append(fastMoverEnemy)
+    }
+}
+
+extension GameScene {
+    func shakeScreen(duration: TimeInterval, intensity: CGFloat) {
+        guard let cameraNode = cameraNode else { return }
+
+        // Create a shake action
+        let shakeAction = SKAction.customAction(withDuration: duration) { node, elapsedTime in
+            let randomX = CGFloat.random(in: -intensity...intensity)
+            let randomY = CGFloat.random(in: -intensity...intensity)
+            node.position = CGPoint(x: self.size.width / 2 + randomX, y: self.size.height / 2 + randomY)
+        }
+
+        // Reset the camera position after shaking
+        let resetPosition = SKAction.run { [weak self] in
+            self?.cameraNode.position = CGPoint(x: self!.size.width / 2, y: self!.size.height / 2)
+        }
+
+        // Run the shake followed by resetting the position
+        cameraNode.run(SKAction.sequence([shakeAction, resetPosition]))
     }
 }

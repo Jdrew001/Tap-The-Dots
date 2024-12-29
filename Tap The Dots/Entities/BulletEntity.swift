@@ -5,10 +5,10 @@ class BulletEntity: Entity {
         super.init()
 
         // Render Component
-        let bulletNode = SKShapeNode(circleOfRadius: 5)
+        let bulletNode = SKShapeNode(circleOfRadius: 2)
         bulletNode.fillColor = .clear
         bulletNode.strokeColor = .red
-        bulletNode.lineWidth = 8
+        bulletNode.lineWidth = 4
         bulletNode.glowWidth = 5
         bulletNode.blendMode = .add
         bulletNode.position = position
