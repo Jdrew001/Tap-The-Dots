@@ -10,11 +10,18 @@ import SpriteKit
 
 class GameOverState: GameState {
     func enter(view: SKView) {
-        SceneManager.transition(to: GameOverScene(size: view.bounds.size), in: view, with: SKTransition.fade(withDuration: 0.4))
+        // Get the current score and high score from the ScoreManager
+        let score = ScoreManager.shared.getScore()
+        let highScore = ScoreManager.shared.highScore
+
+        // Create the GameOverScene with score and highScore
+        let gameOverScene = GameOverScene(size: view.bounds.size, score: score, highScore: highScore)
+
+        // Transition to the GameOverScene
+        SceneManager.transition(to: gameOverScene, in: view, with: SKTransition.fade(withDuration: 0.4))
     }
 
     func update(deltaTime: TimeInterval) {}
 
-    func exit() {
-    }
+    func exit() {}
 }

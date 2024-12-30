@@ -3,7 +3,7 @@ import SpriteKit
 import GameplayKit
 
 class ViewController: NSViewController {
-
+    
     @IBOutlet var skView: SKView!
     
     override func viewDidLoad() {
@@ -37,22 +37,22 @@ class ViewController: NSViewController {
             window.toggleFullScreen(nil)
         }
     }
-
-    func showMenuScene() {
-        let scene = MenuScene(size: skView.bounds.size)
-        scene.scaleMode = .aspectFill
-        skView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
-    }
-
-    func showGameScene() {
-        let scene = GameScene(size: skView.bounds.size)
-        scene.scaleMode = .aspectFill
-        skView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
-    }
-
-    func showGameOverScene() {
-        let scene = GameOverScene(size: skView.bounds.size)
-        scene.scaleMode = .aspectFill
-        skView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
-    }
+    
+//    func showMenuScene() {
+//        let scene = MenuScene(size: skView.bounds.size)
+//        scene.scaleMode = .aspectFill
+//        skView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
+//    }
+//    
+//    func showGameScene() {
+//        let scene = GameScene(size: skView.bounds.size)
+//        scene.scaleMode = .aspectFill
+//        skView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
+//    }
+//    
+//    func showGameOverScene(score: Int, highScore: Int) {
+//        let scene = GameOverScene(size: skView.bounds.size, score: score, highScore: highScore)
+//        scene.scaleMode = .aspectFill
+//        skView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
+//    }
 }

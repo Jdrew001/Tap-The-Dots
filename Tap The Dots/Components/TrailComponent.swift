@@ -29,7 +29,7 @@ class TrailComponent: Component {
             trail.position = CGPoint(x: 0, y: size.height / 2)
 
             // Adjust particle properties for smaller, smoother trails
-            trail.particleLifetime = 0.8 // Shorter lifetime for smaller trails
+            trail.particleLifetime = 5 // Shorter lifetime for smaller trails
             trail.particleBirthRate = 50 // Fewer particles for a lighter effect
             trail.particleSpeed = 100 * difficultyFactor // Slower particle speed
             trail.particleSpeedRange = 20

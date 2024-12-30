@@ -27,7 +27,7 @@ class BulletEntity: Entity {
         let length = sqrt(direction.dx * direction.dx + direction.dy * direction.dy)
         guard length > 0 else { return }
         let normalizedDirection = CGVector(dx: direction.dx / length, dy: direction.dy / length)
-        let bulletSpeed: CGFloat = 300
+        let bulletSpeed: CGFloat = 125
         let velocity = CGVector(dx: normalizedDirection.dx * bulletSpeed,
                                  dy: normalizedDirection.dy * bulletSpeed)
         addComponent(MovementComponent(velocity: velocity, acceleration: 0, friction: 1.0))

@@ -5,6 +5,8 @@ class SpawnManager {
     private var spawnTimers: [String: TimeInterval] = [:]
     private var targetSpawnRates: [String: TimeInterval] = [:]
     private let spawnRateChangeSpeed: TimeInterval = 0.05
+    private var healthPackSpawnTimer: TimeInterval = 0
+    private let healthPackSpawnRate: TimeInterval = 5
 
     weak var scene: SKScene?
     weak var delegate: SpawnManagerDelegate?
@@ -41,27 +43,59 @@ class SpawnManager {
 
     private func adjustSpawnRates(deltaTime: TimeInterval, currentPhase: Int) {
         for type in spawnRates.keys {
-            let baseRate = max(1.0 / Double(currentPhase), 0.3)
-            let randomOffset = Double.random(in: -0.1...0.1)
-            targetSpawnRates[type] = max(baseRate + randomOffset, 0.2)
+            // Base rates for different types
+            let baseRate: Double
+            if type == "Shooter" {
+                baseRate = max(5.0 / Double(currentPhase), 1.5) // Slower rate for Shooters
+            } else {
+                baseRate = max(2.0 / Double(currentPhase), 0.5) // Faster rate for other types
+            }
+            
+            let randomOffset = Double.random(in: -0.2...0.2)
+            targetSpawnRates[type] = max(baseRate + randomOffset, 0.5)
 
+            // Gradually adjust towards the target
             if spawnRates[type]! > targetSpawnRates[type]! {
                 spawnRates[type]! -= spawnRateChangeSpeed * deltaTime
-                spawnRates[type]! = max(spawnRates[type]!, targetSpawnRates[type]!)
             } else if spawnRates[type]! < targetSpawnRates[type]! {
                 spawnRates[type]! += spawnRateChangeSpeed * deltaTime
-                spawnRates[type]! = min(spawnRates[type]!, targetSpawnRates[type]!)
             }
         }
     }
-
+    
     private func spawnEntities(deltaTime: TimeInterval, currentSettings: PhaseSettings) {
         for type in currentSettings.enemyTypes {
+            // Ensure spawnTimers and spawnRates are initialized
+            if spawnTimers[type] == nil {
+                spawnTimers[type] = 0
+            }
+            if spawnRates[type] == nil {
+                spawnRates[type] = 1.0 // Default spawn rate
+            }
+
             spawnTimers[type]! += deltaTime
-            if spawnTimers[type]! >= spawnRates[type]! {
+
+            if type == "Shooter" {
+                let spawnProbability = max(0.1, 0.3 - (0.05 * Double(currentSettings.currentPhase ?? 1))) // Reduce chance as phase increases
+                if spawnTimers[type]! >= spawnRates[type]! && Double.random(in: 0...1) <= spawnProbability {
+                    spawnEntity(ofType: type, currentSettings: currentSettings)
+                    spawnTimers[type] = 0
+                }
+            } else if spawnTimers[type]! >= spawnRates[type]! {
                 spawnEntity(ofType: type, currentSettings: currentSettings)
                 spawnTimers[type] = 0
             }
+        }
+        
+        // Handle health pack spawning separately
+        healthPackSpawnTimer += deltaTime
+        if healthPackSpawnTimer >= healthPackSpawnRate {
+            if let gameScene = scene as? GameScene,
+               gameScene.player.health < gameScene.player.maxHealth { // Only spawn if player needs healing
+                let healthPack = spawnHealthPack(in: gameScene)
+                delegate?.didSpawnHealthPack(healthPack)
+            }
+            healthPackSpawnTimer = 0 // Reset the timer
         }
     }
 
@@ -108,6 +142,12 @@ class SpawnManager {
         let fastMover = FastMoverEnemyEntity(scene: scene, difficultyFactor: difficultyFactor)
         return fastMover
     }
+    
+    private func spawnHealthPack(in scene: SKScene) -> HealthPackEntity {
+        let healthPack = HealthPackEntity(scene: scene)
+        delegate?.didSpawnHealthPack(healthPack)
+        return healthPack
+    }
 }
 
 protocol SpawnManagerDelegate: AnyObject {
@@ -115,4 +155,5 @@ protocol SpawnManagerDelegate: AnyObject {
     func didSpawnShootingEnemy(_ shootingEnemy: ShootingEnemyEntity)
     func didSpawnFastMoverEnemy(_ fastMoverEnemy: FastMoverEnemyEntity)
     func didSpawnBullet(_ bullet: BulletEntity)
+    func didSpawnHealthPack(_ healthPack: HealthPackEntity)
 }

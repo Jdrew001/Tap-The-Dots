@@ -49,6 +49,13 @@ class PlayerEntity: Entity {
         }
         flashPlayer()
     }
+    
+    func heal(by amount: Int = 1) {
+        health = min(health + amount, maxHealth) // Cap health at maxHealth
+        if let scene = getComponent(ofType: RenderComponent.self)?.node.scene as? GameScene {
+            scene.showHealingEffect()
+        }
+    }
 
     func isAlive() -> Bool {
         return health > 0

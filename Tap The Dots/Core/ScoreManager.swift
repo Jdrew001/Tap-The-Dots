@@ -1,35 +1,53 @@
 class ScoreManager {
     static let shared = ScoreManager()
 
-    private var score: Int = 0
-    private var listeners: [(Int) -> Void] = []
+    private var score: Int = 0 {
+        didSet {
+            notifyObservers()
+        }
+    }
+    private(set) var highScore: Int = 0
+    private var observers: [(Int) -> Void] = []
+    private var hasNotifiedHighScore: Bool = false // Track notification status
 
-    private init() {}
-
-    // Increment the score
-    func increment(by value: Int) {
-        score += value
-        notifyListeners()
+    // Subscribe method
+    func subscribe(_ observer: @escaping (Int) -> Void) {
+        observers.append(observer)
     }
 
-    // Reset the score
+    private func notifyObservers() {
+        for observer in observers {
+            observer(score)
+        }
+    }
+
+    func increment(by points: Int) {
+        if highScore == 0 {
+            hasNotifiedHighScore = true
+        }
+        print ("highscore", highScore)
+        score += points
+        updateHighScoreIfNeeded()
+    }
+
     func reset() {
         score = 0
-        notifyListeners()
+        hasNotifiedHighScore = false // Reset notification flag
     }
 
-    // Get the current score
     func getScore() -> Int {
         return score
     }
 
-    // Subscribe to score updates
-    func subscribe(listener: @escaping (Int) -> Void) {
-        listeners.append(listener)
-        listener(score) // Immediately notify the new listener with the current score
-    }
-
-    private func notifyListeners() {
-        listeners.forEach { $0(score) }
+    func updateHighScoreIfNeeded() {
+        if score > highScore {
+            highScore = score
+            
+            // Notify via EventManager only if the high score is non-zero and not yet notified
+            if highScore > 0 && !hasNotifiedHighScore {
+                EventManager.shared.notify(event: "HighScoreUpdated")
+                hasNotifiedHighScore = true // Mark as notified
+            }
+        }
     }
 }

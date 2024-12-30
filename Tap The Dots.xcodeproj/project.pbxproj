@@ -23,6 +23,9 @@
 		390171272D1D223E007812B7 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390171262D1D223E007812B7 /* Utils.swift */; };
 		390171292D1D2626007812B7 /* TronTrailComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390171282D1D2626007812B7 /* TronTrailComponent.swift */; };
 		3901712C2D20CC2C007812B7 /* SpawnManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3901712B2D20CC2C007812B7 /* SpawnManager.swift */; };
+		3901712E2D224240007812B7 /* ScrollingBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3901712D2D224240007812B7 /* ScrollingBackground.swift */; };
+		390171322D2245B7007812B7 /* HealthPackEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390171312D2245B7007812B7 /* HealthPackEntity.swift */; };
+		390171342D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390171332D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift */; };
 		393AAF522D07A7F2009D8159 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393AAF512D07A7F2009D8159 /* AppDelegate.swift */; };
 		393AAF582D07A7F2009D8159 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393AAF572D07A7F2009D8159 /* GameScene.swift */; };
 		393AAF5A2D07A7F2009D8159 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393AAF592D07A7F2009D8159 /* ViewController.swift */; };
@@ -66,6 +69,9 @@
 		390171262D1D223E007812B7 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		390171282D1D2626007812B7 /* TronTrailComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TronTrailComponent.swift; sourceTree = "<group>"; };
 		3901712B2D20CC2C007812B7 /* SpawnManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpawnManager.swift; sourceTree = "<group>"; };
+		3901712D2D224240007812B7 /* ScrollingBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingBackground.swift; sourceTree = "<group>"; };
+		390171312D2245B7007812B7 /* HealthPackEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthPackEntity.swift; sourceTree = "<group>"; };
+		390171332D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerlinNoiseBehaviorComponent.swift; sourceTree = "<group>"; };
 		393AAF4E2D07A7F2009D8159 /* Tap The Dots.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tap The Dots.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		393AAF512D07A7F2009D8159 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		393AAF572D07A7F2009D8159 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -202,6 +208,8 @@
 				3901711C2D1D09C6007812B7 /* BulletEntity.swift */,
 				3901711E2D1D0DD6007812B7 /* ShooterEnemy.swift */,
 				390171202D1D0E75007812B7 /* FastMoverEnemyEntity.swift */,
+				3901712D2D224240007812B7 /* ScrollingBackground.swift */,
+				390171312D2245B7007812B7 /* HealthPackEntity.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -218,6 +226,7 @@
 				390171222D1D156C007812B7 /* FastMoverBehaviorComponent.swift */,
 				390171242D1D2108007812B7 /* TrailComponent.swift */,
 				390171282D1D2626007812B7 /* TronTrailComponent.swift */,
+				390171332D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -321,6 +330,7 @@
 				393AAF582D07A7F2009D8159 /* GameScene.swift in Sources */,
 				390171132D1CD238007812B7 /* NeonButton.swift in Sources */,
 				397C80B62D1A3B4800405250 /* PlayerEntity.swift in Sources */,
+				390171342D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift in Sources */,
 				397C80C12D1A41A400405250 /* Components.swift in Sources */,
 				397C80AE2D18E9C100405250 /* PlayingState.swift in Sources */,
 				397C80BD2D1A3FFC00405250 /* GameOverScene.swift in Sources */,
@@ -329,6 +339,7 @@
 				390171252D1D2108007812B7 /* TrailComponent.swift in Sources */,
 				397C80B22D18EAA000405250 /* GameOverState.swift in Sources */,
 				397C80BB2D1A3FEA00405250 /* MenuScene.swift in Sources */,
+				3901712E2D224240007812B7 /* ScrollingBackground.swift in Sources */,
 				397C80C92D1A722D00405250 /* SceneManager.swift in Sources */,
 				390171272D1D223E007812B7 /* Utils.swift in Sources */,
 				390171232D1D156C007812B7 /* FastMoverBehaviorComponent.swift in Sources */,
@@ -339,6 +350,7 @@
 				397C80BF2D1A418B00405250 /* Entitiy.swift in Sources */,
 				393AAF522D07A7F2009D8159 /* AppDelegate.swift in Sources */,
 				390171152D1CEA52007812B7 /* PhaseManager.swift in Sources */,
+				390171322D2245B7007812B7 /* HealthPackEntity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
