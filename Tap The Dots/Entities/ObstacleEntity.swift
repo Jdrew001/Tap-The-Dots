@@ -37,9 +37,4 @@ class ObstacleEntity: Entity {
 
         addComponent(TrailComponent(color: neonColor, size: size, difficultyFactor: difficultyFactor))
     }
-    
-    func destroy() {
-        guard let renderComponent = getComponent(ofType: RenderComponent.self) else { return }
-        renderComponent.node.removeFromParent()
-    }
 }

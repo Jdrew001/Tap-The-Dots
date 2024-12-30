@@ -3,12 +3,12 @@ import SpriteKit
 class GameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Properties
     var player: PlayerEntity!
-    var obstacles: [ObstacleEntity] = []
-    var shootingEnemies: [ShootingEnemyEntity] = []
-    var fastMoverEnemies: [FastMoverEnemyEntity] = []
+    var enemies: [Entity] = []
     var bullets: [BulletEntity] = []
+    var playerBullets: [Entity] = []
     var healthPacks: [HealthPackEntity] = []
     var spawnManager: SpawnManager!
+    var isShooting = false;
     private var healthBar: SKShapeNode!
     private var lastUpdateTime: TimeInterval = 0
     private var elapsedTime: TimeInterval = 0
@@ -36,6 +36,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Input Handling
     override func keyDown(with event: NSEvent) {
         handlePlayerInput(event: event)
+    }
+    
+    override func keyUp(with event: NSEvent) {
+        switch event.keyCode {
+        case 49: // Space bar key code
+            isShooting = false // Stop shooting when space bar is released
+        default:
+            break
+        }
     }
     
     // MARK: - Game Loop
@@ -150,19 +159,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private func updateEntities(deltaTime: TimeInterval) {
         player.update(deltaTime: deltaTime)
         
-        for obstacle in obstacles {
-            obstacle.update(deltaTime: deltaTime)
-        }
-        
-        for shooter in shootingEnemies {
-            shooter.update(deltaTime: deltaTime)
-        }
-        
-        for fastMover in fastMoverEnemies {
-            fastMover.update(deltaTime: deltaTime)
+        for enemy in enemies {
+            enemy.update(deltaTime: deltaTime)
         }
         
         for bullet in bullets {
+            bullet.update(deltaTime: deltaTime)
+        }
+        
+        for bullet in playerBullets {
             bullet.update(deltaTime: deltaTime)
         }
         
@@ -172,33 +177,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func removeOffScreenEntities() {
-        obstacles.removeAll { obstacle in
-            let isOffScreen = isNodeOffScreen(obstacle)
+        enemies.removeAll { enemy in
+            let isOffScreen = isNodeOffScreen(enemy)
             if isOffScreen {
-                obstacle.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
+                enemy.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
             }
             return isOffScreen
         }
         
-        shootingEnemies.removeAll { shooter in
-            let isOffScreen = isNodeOffScreen(shooter)
-            if isOffScreen {
-                shooter.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
-                return true
-            }
-            return false
-        }
-        
-        fastMoverEnemies.removeAll { fastMover in
-            let isOffScreen = isNodeOffScreen(fastMover)
-            if isOffScreen {
-                fastMover.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
-                return true
-            }
-            return false
-        }
-        
         bullets.removeAll { bullet in
+            let isOffScreen = isNodeOffScreen(bullet)
+            if isOffScreen {
+                bullet.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
+            }
+            return isOffScreen
+        }
+        
+        playerBullets.removeAll { bullet in
             let isOffScreen = isNodeOffScreen(bullet)
             if isOffScreen {
                 bullet.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
@@ -256,9 +251,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private func handleCollisions() {
         guard let playerCollision = player.getComponent(ofType: CollisionComponent.self) else { return }
         
-        for obstacle in obstacles {
-            if let obstacleCollision = obstacle.getComponent(ofType: CollisionComponent.self),
-               playerCollision.checkCollision(with: obstacleCollision) {
+        for enemy in enemies {
+            if let enemyCollision = enemy.getComponent(ofType: CollisionComponent.self),
+               playerCollision.checkCollision(with: enemyCollision) {
                 player.takeDamage()
                 updateHealthBar()
                 if !player.isAlive() {
@@ -267,33 +262,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 return
             }
         }
-        
-        for shooter in shootingEnemies {
-            if let shooterCollision = shooter.getComponent(ofType: CollisionComponent.self),
-               playerCollision.checkCollision(with: shooterCollision) {
-                player.takeDamage()
-                updateHealthBar()
-                if !player.isAlive() {
-                    gameOver()
-                }
-                return
-            }
-        }
-        
-        for fastMover in fastMoverEnemies {
-            if let fastMoverCollision = fastMover.getComponent(ofType: CollisionComponent.self),
-               playerCollision.checkCollision(with: fastMoverCollision) {
-                player.takeDamage()
-                updateHealthBar()
-                if !player.isAlive() {
-                    gameOver()
-                }
-                return
-            }
-        }
+
         
         for bullet in bullets {
-            print(bullet)
             if let bulletCollision = bullet.getComponent(ofType: CollisionComponent.self),
                playerCollision.checkCollision(with: bulletCollision) {
                 player.takeDamage()
@@ -302,6 +273,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     gameOver()
                 }
                 return
+            }
+        }
+        
+        for bullet in playerBullets {
+            if let bulletCollision = bullet.getComponent(ofType: CollisionComponent.self) {
+                for enemy in enemies {
+                    if let enemyCollision = enemy.getComponent(ofType: CollisionComponent.self),
+                       bulletCollision.checkCollision(with: enemyCollision) {
+                        enemy.destroy()
+                        bullet.destroy()
+                    }
+                }
             }
         }
         
@@ -364,7 +347,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         case 2: movementComponent.applyInput(direction: CGVector(dx: 1, dy: 0))  // 'D' Key
         case 1: movementComponent.applyInput(direction: CGVector(dx: 0, dy: -1)) // 'S' Key
         case 13: movementComponent.applyInput(direction: CGVector(dx: 0, dy: 1)) // 'W' Key
+        case 49: if !isShooting { // Start shooting if not already
+            isShooting = true
+            startContinuousShooting()
+        }
         default: break
+        }
+    }
+    
+    private func startContinuousShooting() {
+        guard isShooting else { return } // Exit if shooting is stopped
+
+        player.shoot(using: spawnManager) // Trigger a single shot
+
+        // Schedule the next shot
+        DispatchQueue.main.asyncAfter(deadline: .now() + player.shootCooldown) { [weak self] in
+            self?.startContinuousShooting()
         }
     }
     
@@ -397,22 +395,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 }
 
 extension GameScene: SpawnManagerDelegate {
+    func didSpawnPlayerBullet(_ bullet: Entity) {
+        playerBullets.append(bullet)
+    }
+    
+    func didSpawnEnemy(_ enemy: Entity) {
+        enemies.append(enemy)
+    }
     func didSpawnBullet(_ bullet: BulletEntity) {
         bullets.append(bullet)
     }
-    
-    func didSpawnObstacle(_ obstacle: ObstacleEntity) {
-        obstacles.append(obstacle)
-    }
-
-    func didSpawnShootingEnemy(_ shootingEnemy: ShootingEnemyEntity) {
-        shootingEnemies.append(shootingEnemy)
-    }
-
-    func didSpawnFastMoverEnemy(_ fastMoverEnemy: FastMoverEnemyEntity) {
-        fastMoverEnemies.append(fastMoverEnemy)
-    }
-    
     func didSpawnHealthPack(_ healthPack: HealthPackEntity) {
         healthPacks.append(healthPack)
     }

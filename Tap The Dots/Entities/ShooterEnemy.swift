@@ -1,7 +1,7 @@
 import SpriteKit
 
 class ShootingEnemyEntity: Entity {
-    init(scene: SKScene, difficultyFactor: CGFloat) {
+    init(scene: SKScene, difficultyFactor: CGFloat, spawnManager: SpawnManager) {
         super.init()
         let size = CGSize(width: 30, height: 30)
         let neonColor = GameUtils.randomNeonColor()
@@ -25,15 +25,12 @@ class ShootingEnemyEntity: Entity {
                                         acceleration: 0,
                                         friction: 1.0))
         
-        addComponent(ShooterComponent())
+        let shooterComponent = ShooterComponent()
+        shooterComponent.spawnManager = spawnManager
+        addComponent(shooterComponent)
         addComponent(CollisionComponent(size: CGSize(width: 30, height: 30)) { [weak self] _ in
             self?.destroy()
         })
         addComponent(TrailComponent(color: neonColor, size: size, difficultyFactor: difficultyFactor))
-    }
-
-    func destroy() {
-        guard let renderComponent = getComponent(ofType: RenderComponent.self) else { return }
-        renderComponent.node.removeFromParent()
     }
 }

@@ -26,6 +26,7 @@
 		3901712E2D224240007812B7 /* ScrollingBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3901712D2D224240007812B7 /* ScrollingBackground.swift */; };
 		390171322D2245B7007812B7 /* HealthPackEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390171312D2245B7007812B7 /* HealthPackEntity.swift */; };
 		390171342D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390171332D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift */; };
+		390171382D2309CA007812B7 /* SimpleBulletEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390171372D2309CA007812B7 /* SimpleBulletEntity.swift */; };
 		393AAF522D07A7F2009D8159 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393AAF512D07A7F2009D8159 /* AppDelegate.swift */; };
 		393AAF582D07A7F2009D8159 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393AAF572D07A7F2009D8159 /* GameScene.swift */; };
 		393AAF5A2D07A7F2009D8159 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393AAF592D07A7F2009D8159 /* ViewController.swift */; };
@@ -72,6 +73,7 @@
 		3901712D2D224240007812B7 /* ScrollingBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingBackground.swift; sourceTree = "<group>"; };
 		390171312D2245B7007812B7 /* HealthPackEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthPackEntity.swift; sourceTree = "<group>"; };
 		390171332D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerlinNoiseBehaviorComponent.swift; sourceTree = "<group>"; };
+		390171372D2309CA007812B7 /* SimpleBulletEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBulletEntity.swift; sourceTree = "<group>"; };
 		393AAF4E2D07A7F2009D8159 /* Tap The Dots.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tap The Dots.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		393AAF512D07A7F2009D8159 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		393AAF572D07A7F2009D8159 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -210,6 +212,7 @@
 				390171202D1D0E75007812B7 /* FastMoverEnemyEntity.swift */,
 				3901712D2D224240007812B7 /* ScrollingBackground.swift */,
 				390171312D2245B7007812B7 /* HealthPackEntity.swift */,
+				390171372D2309CA007812B7 /* SimpleBulletEntity.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -332,6 +335,7 @@
 				397C80B62D1A3B4800405250 /* PlayerEntity.swift in Sources */,
 				390171342D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift in Sources */,
 				397C80C12D1A41A400405250 /* Components.swift in Sources */,
+				390171382D2309CA007812B7 /* SimpleBulletEntity.swift in Sources */,
 				397C80AE2D18E9C100405250 /* PlayingState.swift in Sources */,
 				397C80BD2D1A3FFC00405250 /* GameOverScene.swift in Sources */,
 				3901712C2D20CC2C007812B7 /* SpawnManager.swift in Sources */,

@@ -43,9 +43,4 @@ class FastMoverEnemyEntity: Entity {
         addComponent(FastMoverBehaviorComponent(frequency: self.frequency, amplitude: self.amplitude, startsRight: self.startsRight))
         addComponent(TrailComponent(color: neonColor, size: size, difficultyFactor: 1.0))
     }
-
-    func destroy() {
-        guard let renderComponent = getComponent(ofType: RenderComponent.self) else { return }
-        renderComponent.node.removeFromParent()
-    }
 }

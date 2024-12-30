@@ -39,5 +39,10 @@ class EnemyEntity: Entity {
             friction: 1.0
         ))
         addComponent(CollisionComponent(size: size))
+        addComponent(CollisionComponent(size: CGSize(width: size.width, height: size.height)) { [weak self] entity in
+            if entity is BulletEntity {
+                self?.destroy() // Destroy the enemy
+            }
+        })
     }
 }

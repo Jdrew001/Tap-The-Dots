@@ -23,32 +23,32 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "36978430-EFE1-4634-A862-783332458D82"
+            uuid = "3F3EB9A3-EC7B-4747-B4B3-EB6B0669FADD"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Tap The Dots/Core/ScoreManager.swift"
+            filePath = "Tap The Dots/Core/SpawnManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "26"
-            endingLineNumber = "26"
-            landmarkName = "increment(by:)"
+            startingLineNumber = "122"
+            endingLineNumber = "122"
+            landmarkName = "notifyBulletSpawn(from:to:bullet:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "671C94D3-6424-45C9-937E-9FDFE531E943"
-            shouldBeEnabled = "Yes"
+            uuid = "07E4A328-26D9-4516-91CC-8DFF1BE1B48C"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Tap The Dots/Core/ScoreManager.swift"
+            filePath = "Tap The Dots/Components/ShooterComponent.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "44"
-            endingLineNumber = "44"
-            landmarkName = "updateHighScoreIfNeeded()"
+            startingLineNumber = "52"
+            endingLineNumber = "52"
+            landmarkName = "shoot()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

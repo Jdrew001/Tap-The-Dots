@@ -3,8 +3,12 @@ import SpriteKit
 class PlayerEntity: Entity {
     var health: Int
     let maxHealth: Int
+    var canShoot: Bool = true
+    let shootCooldown: TimeInterval = 0.3
     private var isInvincible: Bool = false
-    
+    private var isShooting: Bool = false
+    private var shootTimer: Timer? // Timer for continuous shooting
+
     init(scene: SKScene, acceleration: CGFloat, friction: CGFloat, maxHealth: Int = 3) {
         self.health = maxHealth
         self.maxHealth = maxHealth
@@ -39,6 +43,7 @@ class PlayerEntity: Entity {
         
         // Create and add the movement component
         addComponent(MovementComponent(acceleration: acceleration, friction: friction))
+        addComponent(CollisionComponent(size: CGSize(width: 40, height: 40)))
     }
     
     func takeDamage() {
@@ -59,6 +64,34 @@ class PlayerEntity: Entity {
 
     func isAlive() -> Bool {
         return health > 0
+    }
+    
+    func startShooting(using spawnManager: SpawnManager) {
+        guard !isShooting else { return }
+        isShooting = true
+        
+        // Start the shooting timer
+        shootTimer = Timer.scheduledTimer(withTimeInterval: shootCooldown, repeats: true) { [weak self] _ in
+            self?.shoot(using: spawnManager)
+        }
+    }
+
+    func stopShooting() {
+        isShooting = false
+        shootTimer?.invalidate()
+        shootTimer = nil
+    }
+
+    func shoot(using spawnManager: SpawnManager) {
+        guard canShoot else { return } // Prevent shooting during cooldown
+
+        guard let renderComponent = getComponent(ofType: RenderComponent.self),
+              let scene = renderComponent.node.scene else { return }
+
+        let position = renderComponent.node.position
+        let target = CGPoint(x: position.x, y: scene.size.height)
+
+        spawnManager.spawnPlayerBullet(from: position, to: target)
     }
     
     private func flashPlayer() {

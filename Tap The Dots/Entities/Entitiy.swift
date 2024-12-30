@@ -23,5 +23,17 @@ class Entity {
     func update(deltaTime: TimeInterval) {
         components.forEach { $0.update(deltaTime: deltaTime) }
     }
+    
+    func destroy() {
+        if let renderComponent = getComponent(ofType: RenderComponent.self) {
+            renderComponent.node.physicsBody = nil
+            renderComponent.node.removeFromParent()
+            self.removeComponent(ofType: CollisionComponent.self)
+            self.removeComponent(ofType: MovementComponent.self)
+        }
+
+        // Remove all components from the entity
+        //self.components.removeAll()
+    }
 }
 

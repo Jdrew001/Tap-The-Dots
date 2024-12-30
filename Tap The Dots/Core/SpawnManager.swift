@@ -104,22 +104,29 @@ class SpawnManager {
         switch type {
         case "Basic":
             let obstacle = spawnObstacle(in: scene)
-            delegate?.didSpawnObstacle(obstacle)
+            delegate?.didSpawnEnemy(obstacle)
         case "Shooter":
             let baseSpeedMultiplier: CGFloat = 0.5 // Reduce the base speed
             let speedMultiplier: CGFloat = CGFloat.random(in: baseSpeedMultiplier...(baseSpeedMultiplier + (CGFloat(currentSettings.currentPhase!) * 0.5)))
             let shooter = spawnShootingEnemy(in: scene, speedMultiplier: speedMultiplier, currentSettings: currentSettings)
-            delegate?.didSpawnShootingEnemy(shooter)
+            delegate?.didSpawnEnemy(shooter)
         case "FastMover":
             let fastMover = spawnFastMoverEnemy(in: scene)
-            delegate?.didSpawnFastMoverEnemy(fastMover)
+            delegate?.didSpawnEnemy(fastMover)
         default:
             break
         }
     }
     
     func notifyBulletSpawn(from position: CGPoint, to target: CGPoint, bullet: BulletEntity) {
-        delegate?.didSpawnBullet(bullet) // Notify delegate about the spawned bullet
+        delegate?.didSpawnBullet(bullet)
+    }
+    
+    func spawnPlayerBullet(from position: CGPoint, to target: CGPoint) {
+        guard let scene = scene else { return }
+
+        let bullet = SimpleBulletEntity(scene: scene, position: position, target: target)
+        delegate?.didSpawnPlayerBullet(bullet)
     }
 
     private func spawnObstacle(in scene: SKScene) -> ObstacleEntity {
@@ -139,7 +146,7 @@ class SpawnManager {
         let adjustedSpeedMultiplier = max(baseSpeedMultiplier + phaseSpeedBonus, 1.0)
         
         // Return a new ShootingEnemyEntity
-        return ShootingEnemyEntity(scene: scene, difficultyFactor: difficultyFactor * adjustedSpeedMultiplier)
+        return ShootingEnemyEntity(scene: scene, difficultyFactor: difficultyFactor * adjustedSpeedMultiplier, spawnManager: self)
     }
 
     private func spawnFastMoverEnemy(in scene: SKScene) -> FastMoverEnemyEntity {
@@ -155,9 +162,8 @@ class SpawnManager {
 }
 
 protocol SpawnManagerDelegate: AnyObject {
-    func didSpawnObstacle(_ obstacle: ObstacleEntity)
-    func didSpawnShootingEnemy(_ shootingEnemy: ShootingEnemyEntity)
-    func didSpawnFastMoverEnemy(_ fastMoverEnemy: FastMoverEnemyEntity)
+    func didSpawnEnemy(_ enemy: Entity)
     func didSpawnBullet(_ bullet: BulletEntity)
+    func didSpawnPlayerBullet(_ bullet: Entity)
     func didSpawnHealthPack(_ healthPack: HealthPackEntity)
 }
