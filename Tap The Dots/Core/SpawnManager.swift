@@ -43,18 +43,16 @@ class SpawnManager {
 
     private func adjustSpawnRates(deltaTime: TimeInterval, currentPhase: Int) {
         for type in spawnRates.keys {
-            // Base rates for different types
             let baseRate: Double
             if type == "Shooter" {
-                baseRate = max(5.0 / Double(currentPhase), 1.5) // Slower rate for Shooters
+                baseRate = max(4.0 / Double(currentPhase), 1.0) // Slightly faster for Shooters
             } else {
-                baseRate = max(2.0 / Double(currentPhase), 0.5) // Faster rate for other types
+                baseRate = max(1.5 / Double(currentPhase), 0.3) // Faster rates for other types
             }
             
-            let randomOffset = Double.random(in: -0.2...0.2)
-            targetSpawnRates[type] = max(baseRate + randomOffset, 0.5)
+            let randomOffset = Double.random(in: -0.15...0.15)
+            targetSpawnRates[type] = max(baseRate + randomOffset, 0.2)
 
-            // Gradually adjust towards the target
             if spawnRates[type]! > targetSpawnRates[type]! {
                 spawnRates[type]! -= spawnRateChangeSpeed * deltaTime
             } else if spawnRates[type]! < targetSpawnRates[type]! {
@@ -76,7 +74,7 @@ class SpawnManager {
             spawnTimers[type]! += deltaTime
 
             if type == "Shooter" {
-                let spawnProbability = max(0.1, 0.3 - (0.05 * Double(currentSettings.currentPhase ?? 1))) // Reduce chance as phase increases
+                let spawnProbability = max(0.2, 0.5 - (0.03 * Double(currentSettings.currentPhase!))) // Keep shooters relevant // Reduce chance as phase increases
                 if spawnTimers[type]! >= spawnRates[type]! && Double.random(in: 0...1) <= spawnProbability {
                     spawnEntity(ofType: type, currentSettings: currentSettings)
                     spawnTimers[type] = 0
@@ -89,13 +87,14 @@ class SpawnManager {
         
         // Handle health pack spawning separately
         healthPackSpawnTimer += deltaTime
-        if healthPackSpawnTimer >= healthPackSpawnRate {
+        let dynamicHealthPackSpawnRate = max(healthPackSpawnRate - (Double(currentSettings.currentPhase ?? 1) * 0.5), 3.0)
+        if healthPackSpawnTimer >= dynamicHealthPackSpawnRate {
             if let gameScene = scene as? GameScene,
-               gameScene.player.health < gameScene.player.maxHealth { // Only spawn if player needs healing
+               gameScene.player.health < gameScene.player.maxHealth {
                 let healthPack = spawnHealthPack(in: gameScene)
                 delegate?.didSpawnHealthPack(healthPack)
             }
-            healthPackSpawnTimer = 0 // Reset the timer
+            healthPackSpawnTimer = 0
         }
     }
 
@@ -109,7 +108,7 @@ class SpawnManager {
         case "Shooter":
             let baseSpeedMultiplier: CGFloat = 0.5 // Reduce the base speed
             let speedMultiplier: CGFloat = CGFloat.random(in: baseSpeedMultiplier...(baseSpeedMultiplier + (CGFloat(currentSettings.currentPhase!) * 0.5)))
-            let shooter = spawnShootingEnemy(in: scene, speedMultiplier: speedMultiplier)
+            let shooter = spawnShootingEnemy(in: scene, speedMultiplier: speedMultiplier, currentSettings: currentSettings)
             delegate?.didSpawnShootingEnemy(shooter)
         case "FastMover":
             let fastMover = spawnFastMoverEnemy(in: scene)
@@ -129,13 +128,18 @@ class SpawnManager {
         return obstacle
     }
 
-    private func spawnShootingEnemy(in scene: SKScene, speedMultiplier: CGFloat) -> ShootingEnemyEntity {
-        let shooter = ShootingEnemyEntity(scene: scene, difficultyFactor: difficultyFactor * speedMultiplier)
-        // Assign the SpawnManager to the ShooterComponent
-        if let shooterComponent = shooter.getComponent(ofType: ShooterComponent.self) {
-            shooterComponent.spawnManager = self // Assign SpawnManager
-        }
-        return shooter
+    private func spawnShootingEnemy(in scene: SKScene, speedMultiplier: CGFloat, currentSettings: PhaseSettings) -> ShootingEnemyEntity {
+        // Define a base speed multiplier
+        let baseSpeedMultiplier: CGFloat = 0.5 // Adjust this base value as needed
+        
+        // Calculate a phase-dependent speed bonus
+        let phaseSpeedBonus = CGFloat(currentSettings.currentPhase ?? 1) * 0.2
+        
+        // Adjust the final speed multiplier
+        let adjustedSpeedMultiplier = max(baseSpeedMultiplier + phaseSpeedBonus, 1.0)
+        
+        // Return a new ShootingEnemyEntity
+        return ShootingEnemyEntity(scene: scene, difficultyFactor: difficultyFactor * adjustedSpeedMultiplier)
     }
 
     private func spawnFastMoverEnemy(in scene: SKScene) -> FastMoverEnemyEntity {
