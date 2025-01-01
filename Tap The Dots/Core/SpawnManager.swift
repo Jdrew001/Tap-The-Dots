@@ -82,8 +82,14 @@ class SpawnManager {
             spawnTimers[type]! += deltaTime
 
             if type == "Shooter" {
-                // Probability increases with the phase number
-                let spawnProbability = min(0.05 + (0.05 * Double(currentSettings.currentPhase!)), 0.8)
+                // Extremely slow increasing spawn probability
+                let baseProbability = 0.001 // Starts at a very low chance
+                let phase = Double(currentSettings.currentPhase ?? 1)
+                let maxProbability = 0.8  // Cap the probability at 80%
+                
+                // Ultra-slow growth using a reduced logarithmic curve
+                let spawnProbability = min(baseProbability + (log(phase + 1) * 0.005), maxProbability)
+
                 if spawnTimers[type]! >= spawnRates[type]! && Double.random(in: 0...1) <= spawnProbability {
                     spawnEntity(ofType: type, currentSettings: currentSettings)
                     spawnTimers[type] = 0

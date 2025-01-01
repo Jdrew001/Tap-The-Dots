@@ -37,10 +37,32 @@ class FastMoverEnemyEntity: Entity {
         
         // Collision Component
         addComponent(CollisionComponent(size: CGSize(width: 30, height: 30)) { [weak self] _ in
-            self?.destroy()
+            self?.triggerExplosionAndDestroy()
         })
         
         addComponent(FastMoverBehaviorComponent(frequency: self.frequency, amplitude: self.amplitude, startsRight: self.startsRight))
         addComponent(TrailComponent(color: neonColor, size: size, difficultyFactor: 1.0))
+        addComponent(EnemyExplodingComponent(
+            scene: scene as! GameScene,
+            position: fastMoverNode.position,
+            nodeColor: neonColor
+        ))
+    }
+    
+    private func triggerExplosionAndDestroy() {
+        guard let explosionComponent = getComponent(ofType: EnemyExplodingComponent.self) else {
+            print("EnemyExplodingComponent not found")
+            return
+        }
+
+        // Trigger the explosion effect
+        if let explodingComponent = getComponent(ofType: EnemyExplodingComponent.self) {
+            explodingComponent.triggerExplosion()
+        }
+
+        // Delay entity destruction until the explosion effect is done
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.destroy()
+        }
     }
 }

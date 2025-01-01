@@ -259,7 +259,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func handleCollisions() {
         guard let playerCollision = player.getComponent(ofType: CollisionComponent.self) else { return }
-        
+
+        // Handle collisions with enemies
         for enemy in enemies {
             if let enemyCollision = enemy.getComponent(ofType: CollisionComponent.self),
                playerCollision.checkCollision(with: enemyCollision) {
@@ -272,7 +273,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
 
-        
+        // Handle collisions with bullets
         for bullet in bullets {
             if let bulletCollision = bullet.getComponent(ofType: CollisionComponent.self),
                playerCollision.checkCollision(with: bulletCollision) {
@@ -284,19 +285,35 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 return
             }
         }
-        
+
+        // Handle collisions between player bullets and enemies
         for bullet in playerBullets {
             if let bulletCollision = bullet.getComponent(ofType: CollisionComponent.self) {
                 for enemy in enemies {
                     if let enemyCollision = enemy.getComponent(ofType: CollisionComponent.self),
                        bulletCollision.checkCollision(with: enemyCollision) {
-                        enemy.destroy()
+                        
+                        // Check if the bullet is an explosion bullet
+                        if let explosionComponent = bullet.getComponent(ofType: ExplosionComponent.self) {
+                            // Trigger the bullet's explosion only
+                            explosionComponent.triggerExplosion()
+                            bullet.destroy()
+                            enemy.destroy()
+                            return // Skip enemy explosion
+                        }
+                        
+                        // Otherwise, trigger the enemy's explosion
+                        if let explodingComponent = enemy.getComponent(ofType: EnemyExplodingComponent.self) {
+                            explodingComponent.triggerExplosion()
+                        }
+                        enemy.destroy() // Remove enemy after explosion effect
                         bullet.destroy()
                     }
                 }
             }
         }
-        
+
+        // Handle collisions with health packs
         for healthPack in healthPacks {
             if let healthPackCollision = healthPack.getComponent(ofType: CollisionComponent.self),
                playerCollision.checkCollision(with: healthPackCollision) {
@@ -306,20 +323,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 return
             }
         }
-        
+
+        // Handle collisions with power-ups
         for powerUp in powerUps {
             if let powerUpCollision = powerUp.getComponent(ofType: CollisionComponent.self),
                playerCollision.checkCollision(with: powerUpCollision) {
                 // Delegate the power-up effect to the player
                 player.applyPowerUp(powerUp)
-            
+
                 // Remove the collected power-up
                 powerUp.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
                 powerUps.removeAll { $0 === powerUp }
             }
         }
     }
-    
     private func removeHealthPack(_ healthPack: HealthPackEntity) {
         if let renderComponent = healthPack.getComponent(ofType: RenderComponent.self) {
             renderComponent.node.removeFromParent()

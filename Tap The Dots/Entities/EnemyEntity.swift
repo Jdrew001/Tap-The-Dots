@@ -6,22 +6,26 @@ class EnemyEntity: Entity {
 
         let enemyNode: SKShapeNode
         let size: CGSize
+        let color: NSColor
 
         // Configure enemy appearance based on type
         switch type {
         case "Shooter":
+            color = .red
             size = CGSize(width: 30, height: 30)
             enemyNode = SKShapeNode(rectOf: size, cornerRadius: 5)
-            enemyNode.fillColor = .red
+            enemyNode.fillColor = color
             addComponent(ShooterComponent()) // Add shooter behavior
         case "FastMover":
+            color = .yellow
             size = CGSize(width: 20, height: 20)
             enemyNode = SKShapeNode(circleOfRadius: 10)
-            enemyNode.fillColor = .yellow
+            enemyNode.fillColor = color
         default:
+            color = .gray
             size = CGSize(width: 25, height: 25)
             enemyNode = SKShapeNode(rectOf: size, cornerRadius: 3)
-            enemyNode.fillColor = .gray
+            enemyNode.fillColor = color
         }
 
         // Position enemy at the top of the screen
@@ -44,5 +48,11 @@ class EnemyEntity: Entity {
                 self?.destroy() // Destroy the enemy
             }
         })
+        // Add the explosion component
+        addComponent(EnemyExplodingComponent(
+            scene: scene as! GameScene,
+            position: enemyNode.position, // Use the current position of the node
+            nodeColor: color
+        ))
     }
 }

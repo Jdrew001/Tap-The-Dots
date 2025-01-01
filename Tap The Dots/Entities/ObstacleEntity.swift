@@ -32,9 +32,31 @@ class ObstacleEntity: Entity {
                                        friction: 1.0))
         
         addComponent(CollisionComponent(size: size) { [weak self] _ in
-            self?.destroy()
+            self?.triggerExplosionAndDestroy()
         })
 
         addComponent(TrailComponent(color: neonColor, size: size, difficultyFactor: difficultyFactor))
+        addComponent(EnemyExplodingComponent(
+            scene: scene as! GameScene,
+            position: obstacleNode.position,
+            nodeColor: neonColor
+        ))
+    }
+    
+    private func triggerExplosionAndDestroy() {
+        guard let explosionComponent = getComponent(ofType: EnemyExplodingComponent.self) else {
+            print("EnemyExplodingComponent not found")
+            return
+        }
+
+        // Trigger the explosion effect
+        if let explodingComponent = getComponent(ofType: EnemyExplodingComponent.self) {
+            explodingComponent.triggerExplosion()
+        }
+
+        // Delay entity destruction until the explosion effect is done
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.destroy()
+        }
     }
 }

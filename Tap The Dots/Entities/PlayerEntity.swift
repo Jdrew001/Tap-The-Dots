@@ -8,6 +8,7 @@ class PlayerEntity: Entity {
     private var explosiveRoundTimer: TimeInterval = 0
     private var isUsingTripleShot = false
     private var isInvincible: Bool = false
+    private var invincibilityGlow: SKShapeNode? // Glow circle node
     private var isShooting: Bool = false
     private var shootTimer: Timer? // Timer for continuous shooting
 
@@ -142,9 +143,11 @@ class PlayerEntity: Entity {
     func activateShield(duration: TimeInterval) {
         // Enable invincibility for a duration
         isInvincible = true
+        showInvincibilityGlow() // Show the glow
 
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             self.isInvincible = false
+            self.removeInvincibilityGlow() // Remove the glow
         }
     }
     
@@ -168,5 +171,37 @@ class PlayerEntity: Entity {
             }
         ])
         node.run(invincibilitySequence)
+    }
+    
+    private func showInvincibilityGlow() {
+        guard let renderComponent = getComponent(ofType: RenderComponent.self) else { return }
+        guard invincibilityGlow == nil else { return } // Prevent multiple glows
+
+        let playerNode = renderComponent.node
+
+        // Create the glow circle
+        let glowCircle = SKShapeNode(circleOfRadius: 30)
+        glowCircle.position = CGPoint.zero // Centered in the player's local coordinate space
+        glowCircle.fillColor = .white
+        glowCircle.alpha = 0.3
+        glowCircle.strokeColor = .gray
+        glowCircle.lineWidth = 4
+        glowCircle.glowWidth = 10
+        glowCircle.zPosition = 10 // Behind the player
+
+        playerNode.addChild(glowCircle) // Add the glow to the player's node
+        invincibilityGlow = glowCircle
+
+        // Add a pulsating animation
+        let scaleUp = SKAction.scale(to: 1.2, duration: 0.5)
+        let scaleDown = SKAction.scale(to: 1.0, duration: 0.5)
+        let pulse = SKAction.sequence([scaleUp, scaleDown])
+        glowCircle.run(SKAction.repeatForever(pulse))
+    }
+
+    private func removeInvincibilityGlow() {
+        invincibilityGlow?.removeAllActions() // Stop the animation
+        invincibilityGlow?.removeFromParent()
+        invincibilityGlow = nil
     }
 }
