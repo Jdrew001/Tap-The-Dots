@@ -27,6 +27,9 @@
 		390171322D2245B7007812B7 /* HealthPackEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390171312D2245B7007812B7 /* HealthPackEntity.swift */; };
 		390171342D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390171332D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift */; };
 		390171382D2309CA007812B7 /* SimpleBulletEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390171372D2309CA007812B7 /* SimpleBulletEntity.swift */; };
+		3901713B2D244085007812B7 /* ExplosionBulletEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3901713A2D244085007812B7 /* ExplosionBulletEntity.swift */; };
+		3901713D2D24469B007812B7 /* ExplosionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3901713C2D24469B007812B7 /* ExplosionComponent.swift */; };
+		3901713F2D244AB4007812B7 /* PowerUpEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3901713E2D244AB3007812B7 /* PowerUpEntity.swift */; };
 		393AAF522D07A7F2009D8159 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393AAF512D07A7F2009D8159 /* AppDelegate.swift */; };
 		393AAF582D07A7F2009D8159 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393AAF572D07A7F2009D8159 /* GameScene.swift */; };
 		393AAF5A2D07A7F2009D8159 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393AAF592D07A7F2009D8159 /* ViewController.swift */; };
@@ -74,6 +77,9 @@
 		390171312D2245B7007812B7 /* HealthPackEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthPackEntity.swift; sourceTree = "<group>"; };
 		390171332D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerlinNoiseBehaviorComponent.swift; sourceTree = "<group>"; };
 		390171372D2309CA007812B7 /* SimpleBulletEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBulletEntity.swift; sourceTree = "<group>"; };
+		3901713A2D244085007812B7 /* ExplosionBulletEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExplosionBulletEntity.swift; sourceTree = "<group>"; };
+		3901713C2D24469B007812B7 /* ExplosionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExplosionComponent.swift; sourceTree = "<group>"; };
+		3901713E2D244AB3007812B7 /* PowerUpEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerUpEntity.swift; sourceTree = "<group>"; };
 		393AAF4E2D07A7F2009D8159 /* Tap The Dots.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tap The Dots.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		393AAF512D07A7F2009D8159 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		393AAF572D07A7F2009D8159 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -135,6 +141,16 @@
 				390171122D1CD238007812B7 /* NeonButton.swift */,
 			);
 			path = ui;
+			sourceTree = "<group>";
+		};
+		390171392D244073007812B7 /* Bullets */ = {
+			isa = PBXGroup;
+			children = (
+				3901713A2D244085007812B7 /* ExplosionBulletEntity.swift */,
+				3901711C2D1D09C6007812B7 /* BulletEntity.swift */,
+				390171372D2309CA007812B7 /* SimpleBulletEntity.swift */,
+			);
+			path = Bullets;
 			sourceTree = "<group>";
 		};
 		393AAF452D07A7F2009D8159 = {
@@ -203,16 +219,16 @@
 		397C80A72D18E76E00405250 /* Entities */ = {
 			isa = PBXGroup;
 			children = (
+				390171392D244073007812B7 /* Bullets */,
 				397C80B52D1A3B4800405250 /* PlayerEntity.swift */,
 				397C80B72D1A3B5800405250 /* ObstacleEntity.swift */,
 				397C80BE2D1A418B00405250 /* Entitiy.swift */,
 				390171162D1CEAF8007812B7 /* EnemyEntity.swift */,
-				3901711C2D1D09C6007812B7 /* BulletEntity.swift */,
 				3901711E2D1D0DD6007812B7 /* ShooterEnemy.swift */,
 				390171202D1D0E75007812B7 /* FastMoverEnemyEntity.swift */,
 				3901712D2D224240007812B7 /* ScrollingBackground.swift */,
 				390171312D2245B7007812B7 /* HealthPackEntity.swift */,
-				390171372D2309CA007812B7 /* SimpleBulletEntity.swift */,
+				3901713E2D244AB3007812B7 /* PowerUpEntity.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -230,6 +246,7 @@
 				390171242D1D2108007812B7 /* TrailComponent.swift */,
 				390171282D1D2626007812B7 /* TronTrailComponent.swift */,
 				390171332D224A6E007812B7 /* PerlinNoiseBehaviorComponent.swift */,
+				3901713C2D24469B007812B7 /* ExplosionComponent.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -349,12 +366,15 @@
 				390171232D1D156C007812B7 /* FastMoverBehaviorComponent.swift in Sources */,
 				397C80C72D1A41FE00405250 /* CollisionComponent.swift in Sources */,
 				3901711F2D1D0DD6007812B7 /* ShooterEnemy.swift in Sources */,
+				3901713B2D244085007812B7 /* ExplosionBulletEntity.swift in Sources */,
 				390171212D1D0E75007812B7 /* FastMoverEnemyEntity.swift in Sources */,
 				397C80B02D18EA5100405250 /* MenuState.swift in Sources */,
 				397C80BF2D1A418B00405250 /* Entitiy.swift in Sources */,
 				393AAF522D07A7F2009D8159 /* AppDelegate.swift in Sources */,
 				390171152D1CEA52007812B7 /* PhaseManager.swift in Sources */,
+				3901713F2D244AB4007812B7 /* PowerUpEntity.swift in Sources */,
 				390171322D2245B7007812B7 /* HealthPackEntity.swift in Sources */,
+				3901713D2D24469B007812B7 /* ExplosionComponent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

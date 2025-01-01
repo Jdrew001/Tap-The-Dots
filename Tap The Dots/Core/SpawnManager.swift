@@ -6,7 +6,11 @@ class SpawnManager {
     private var targetSpawnRates: [String: TimeInterval] = [:]
     private let spawnRateChangeSpeed: TimeInterval = 0.05
     private var healthPackSpawnTimer: TimeInterval = 0
-    private let healthPackSpawnRate: TimeInterval = 5
+    private let healthPackSpawnRate: TimeInterval = 10 // 10 seconds
+    private var powerUpSpawnTimer: TimeInterval = 0
+    private let powerUpSpawnRate: TimeInterval = 15.0 // 15 seconds
+    var activePowerUp: PowerUpEntity.PowerUpType? // Track the active power-up
+    
 
     weak var scene: SKScene?
     weak var delegate: SpawnManagerDelegate?
@@ -14,6 +18,8 @@ class SpawnManager {
 
     private var spawnDelayTimer: TimeInterval = 0 // New spawn delay timer
     private let initialSpawnDelay: TimeInterval = 2.5 // Delay time before spawning
+    private var playerHasPowerUp: Bool = false
+    private var powerUpTimer: TimeInterval = 0
 
     init(scene: SKScene, difficultyFactor: CGFloat = 1.0) {
         self.scene = scene
@@ -35,6 +41,8 @@ class SpawnManager {
 
         adjustSpawnRates(deltaTime: deltaTime, currentPhase: currentPhase)
         spawnEntities(deltaTime: deltaTime, currentSettings: currentSettings)
+        handlePowerUpSpawning(deltaTime: deltaTime)
+        checkPowerUpDuration(deltaTime: deltaTime)
     }
 
     func resetSpawnDelay() {
@@ -74,7 +82,8 @@ class SpawnManager {
             spawnTimers[type]! += deltaTime
 
             if type == "Shooter" {
-                let spawnProbability = max(0.2, 0.5 - (0.03 * Double(currentSettings.currentPhase!))) // Keep shooters relevant // Reduce chance as phase increases
+                // Probability increases with the phase number
+                let spawnProbability = min(0.05 + (0.05 * Double(currentSettings.currentPhase!)), 0.8)
                 if spawnTimers[type]! >= spawnRates[type]! && Double.random(in: 0...1) <= spawnProbability {
                     spawnEntity(ofType: type, currentSettings: currentSettings)
                     spawnTimers[type] = 0
@@ -137,13 +146,13 @@ class SpawnManager {
 
     private func spawnShootingEnemy(in scene: SKScene, speedMultiplier: CGFloat, currentSettings: PhaseSettings) -> ShootingEnemyEntity {
         // Define a base speed multiplier
-        let baseSpeedMultiplier: CGFloat = 0.5 // Adjust this base value as needed
-        
-        // Calculate a phase-dependent speed bonus
-        let phaseSpeedBonus = CGFloat(currentSettings.currentPhase ?? 1) * 0.2
-        
+        let baseSpeedMultiplier: CGFloat = 1.0 // Maximum speed multiplier
+
+        // Calculate a phase-dependent speed reduction
+        let phasePenalty = min(CGFloat(currentSettings.currentPhase ?? 1) * 0.05, 0.5) // Cap the penalty at 50%
+
         // Adjust the final speed multiplier
-        let adjustedSpeedMultiplier = max(baseSpeedMultiplier + phaseSpeedBonus, 1.0)
+        let adjustedSpeedMultiplier = max(baseSpeedMultiplier - phasePenalty, 0.5) // Ensure minimum speed multiplier is 0.5
         
         // Return a new ShootingEnemyEntity
         return ShootingEnemyEntity(scene: scene, difficultyFactor: difficultyFactor * adjustedSpeedMultiplier, spawnManager: self)
@@ -159,6 +168,56 @@ class SpawnManager {
         delegate?.didSpawnHealthPack(healthPack)
         return healthPack
     }
+    
+    private func handlePowerUpSpawning(deltaTime: TimeInterval) {
+        powerUpSpawnTimer += deltaTime
+        if powerUpSpawnTimer >= powerUpSpawnRate {
+            powerUpSpawnTimer = 0
+            spawnPowerUp()
+        }
+    }
+
+    private func spawnPowerUp() {
+        guard let scene = scene else { return }
+
+        let randomX = CGFloat.random(in: 50...(scene.size.width - 50))
+        let randomY = CGFloat.random(in: 50...(scene.size.height - 50))
+        let position = CGPoint(x: randomX, y: randomY)
+
+        let powerUpTypes: [PowerUpEntity.PowerUpType] = [.explosiveBullet, .shield, .tripleShot, .slowTime]
+        let randomType = powerUpTypes.randomElement()!
+
+        let powerUp = PowerUpEntity(scene: scene, position: position, type: randomType)
+        delegate?.didSpawnPowerUp(powerUp)
+    }
+
+    private func checkPowerUpDuration(deltaTime: TimeInterval) {
+        if powerUpTimer > 0 {
+            powerUpTimer -= deltaTime
+            if powerUpTimer <= 0 {
+                activePowerUp = nil // Deactivate the power-up when time runs out
+            }
+        }
+    }
+
+    func activatePowerUp(duration: TimeInterval) {
+        playerHasPowerUp = true
+        powerUpTimer = duration
+    }
+    
+    func activateExplosiveBullets(duration: TimeInterval) {
+        activePowerUp = .explosiveBullet // Track active power-up type
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            self.activePowerUp = .unassigned // Reset power-up
+        }
+    }
+
+    func activateTripleShot(duration: TimeInterval) {
+        activePowerUp = .tripleShot
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            self.activePowerUp = .unassigned
+        }
+    }
 }
 
 protocol SpawnManagerDelegate: AnyObject {
@@ -166,4 +225,34 @@ protocol SpawnManagerDelegate: AnyObject {
     func didSpawnBullet(_ bullet: BulletEntity)
     func didSpawnPlayerBullet(_ bullet: Entity)
     func didSpawnHealthPack(_ healthPack: HealthPackEntity)
+    func didSpawnPowerUp(_ powerUp: PowerUpEntity)
+}
+
+extension SpawnManager {
+    func spawnExplosionBullet(from position: CGPoint, to target: CGPoint) {
+        guard let scene = scene as? GameScene else { return }
+        let bullet = ExplosionBulletEntity(scene: scene, position: position, target: target)
+        delegate?.didSpawnPlayerBullet(bullet)
+    }
+
+    func spawnTripleShot(from position: CGPoint) {
+        guard let scene = scene as? GameScene else { return }
+
+       // Define angles for bullets: center, slightly left, slightly right (in radians)
+       let angles: [CGFloat] = [0, -0.2, 0.2] // Radians
+       let bulletSpeed: CGFloat = 300 // Adjust speed as needed
+
+       for angle in angles {
+           // Calculate direction vector for each angle
+           let dx = sin(angle) * bulletSpeed // X-axis offset
+           let dy = cos(angle) * bulletSpeed // Y-axis offset (negative for downward)
+
+           // Compute target position based on the direction vector
+           let target = CGPoint(x: position.x + dx, y: position.y + dy)
+
+           // Spawn bullet
+           let bullet = SimpleBulletEntity(scene: scene, position: position, target: target)
+           delegate?.didSpawnPlayerBullet(bullet)
+       }
+    }
 }

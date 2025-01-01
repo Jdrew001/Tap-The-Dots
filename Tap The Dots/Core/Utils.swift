@@ -1,5 +1,6 @@
 import SpriteKit
 import GameplayKit
+import CoreGraphics
 
 struct GameUtils {
     /// Generate a random neon color.
@@ -39,5 +40,13 @@ struct PerlinNoise {
         let hash = adjustedX ^ adjustedY
         randomSource.seed = withUnsafeBytes(of: hash) { Data($0) } // Hash converted to Data
         return CGFloat(randomSource.nextUniform()) * 2 - 1 // Scale to range [-1, 1]
+    }
+}
+
+extension CGPoint {
+    func distance(to point: CGPoint) -> CGFloat {
+        let dx = point.x - self.x
+        let dy = point.y - self.y
+        return sqrt(dx * dx + dy * dy)
     }
 }

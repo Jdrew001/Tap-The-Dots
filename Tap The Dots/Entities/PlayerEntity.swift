@@ -5,6 +5,8 @@ class PlayerEntity: Entity {
     let maxHealth: Int
     var canShoot: Bool = true
     let shootCooldown: TimeInterval = 0.3
+    private var explosiveRoundTimer: TimeInterval = 0
+    private var isUsingTripleShot = false
     private var isInvincible: Bool = false
     private var isShooting: Bool = false
     private var shootTimer: Timer? // Timer for continuous shooting
@@ -46,6 +48,11 @@ class PlayerEntity: Entity {
         addComponent(CollisionComponent(size: CGSize(width: 40, height: 40)))
     }
     
+    override func update(deltaTime: TimeInterval) {
+        super.update(deltaTime: deltaTime)
+        explosiveRoundTimer = max(0, explosiveRoundTimer - deltaTime)
+    }
+    
     func takeDamage() {
         guard !isInvincible else { return } // Ignore damage if invincible
         health -= 1
@@ -64,6 +71,23 @@ class PlayerEntity: Entity {
 
     func isAlive() -> Bool {
         return health > 0
+    }
+    
+    func applyPowerUp(_ powerUp: PowerUpEntity) {
+        switch powerUp.type {
+        case .explosiveBullet:
+            activateExplosiveBullets()
+        case .tripleShot:
+            activateTripleShot()
+        case .shield:
+            activateShield(duration: 10) // Shield lasts for 10 seconds
+        case .slowTime:
+            if let scene = getComponent(ofType: RenderComponent.self)?.node.scene as? GameScene {
+                scene.activateTimeSlow(duration: 10) // Slow time for 5 seconds
+            }
+        default:
+            break
+        }
     }
     
     func startShooting(using spawnManager: SpawnManager) {
@@ -91,7 +115,37 @@ class PlayerEntity: Entity {
         let position = renderComponent.node.position
         let target = CGPoint(x: position.x, y: scene.size.height)
 
+        // Spawn normal bullet
         spawnManager.spawnPlayerBullet(from: position, to: target)
+
+        // Spawn power-up bullets if active
+        if explosiveRoundTimer > 0 {
+            spawnManager.spawnExplosionBullet(from: position, to: target)
+        }
+
+        if isUsingTripleShot {
+            spawnManager.spawnTripleShot(from: position)
+        }
+    }
+
+    func activateExplosiveBullets() {
+        explosiveRoundTimer = 20.0 // Active for 20 seconds
+    }
+
+    func activateTripleShot() {
+        isUsingTripleShot = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
+            self.isUsingTripleShot = false // Disable after 10 seconds
+        }
+    }
+
+    func activateShield(duration: TimeInterval) {
+        // Enable invincibility for a duration
+        isInvincible = true
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            self.isInvincible = false
+        }
     }
     
     private func flashPlayer() {

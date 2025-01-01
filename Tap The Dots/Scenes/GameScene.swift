@@ -7,6 +7,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var bullets: [BulletEntity] = []
     var playerBullets: [Entity] = []
     var healthPacks: [HealthPackEntity] = []
+    var powerUps: [PowerUpEntity] = []
     var spawnManager: SpawnManager!
     var isShooting = false;
     private var healthBar: SKShapeNode!
@@ -33,20 +34,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    // MARK: - Input Handling
-    override func keyDown(with event: NSEvent) {
-        handlePlayerInput(event: event)
-    }
-    
-    override func keyUp(with event: NSEvent) {
-        switch event.keyCode {
-        case 49: // Space bar key code
-            isShooting = false // Stop shooting when space bar is released
-        default:
-            break
-        }
-    }
-    
     // MARK: - Game Loop
     override func update(_ currentTime: TimeInterval) {
         let deltaTime = calculateDeltaTime(currentTime: currentTime)
@@ -60,6 +47,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         handleCollisions()
         clampPlayerPosition()
         removeOffScreenEntities()
+    }
+    
+    // MARK: - Input Handling
+    override func keyDown(with event: NSEvent) {
+        handlePlayerInput(event: event)
+    }
+    
+    override func keyUp(with event: NSEvent) {
+        switch event.keyCode {
+        case 49: // Space bar key code
+            isShooting = false // Stop shooting when space bar is released
+        default:
+            break
+        }
     }
     
     // MARK: - Setup
@@ -174,6 +175,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for healthPack in healthPacks {
             healthPack.update(deltaTime: deltaTime)
         }
+        
+        for powerUp in powerUps {
+            powerUp.update(deltaTime: deltaTime)
+        }
     }
     
     private func removeOffScreenEntities() {
@@ -181,6 +186,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let isOffScreen = isNodeOffScreen(enemy)
             if isOffScreen {
                 enemy.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
+                enemy.destroy()
             }
             return isOffScreen
         }
@@ -189,6 +195,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let isOffScreen = isNodeOffScreen(bullet)
             if isOffScreen {
                 bullet.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
+                bullet.destroy()
             }
             return isOffScreen
         }
@@ -197,6 +204,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let isOffScreen = isNodeOffScreen(bullet)
             if isOffScreen {
                 bullet.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
+                bullet.destroy()
             }
             return isOffScreen
         }
@@ -205,6 +213,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let isOffScreen = isNodeOffScreen(healthPack)
             if isOffScreen {
                 healthPack.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
+                healthPack.destroy()
             }
             return isOffScreen
         }
@@ -295,6 +304,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 updateHealthBar()
                 removeHealthPack(healthPack) // Remove the collected health pack
                 return
+            }
+        }
+        
+        for powerUp in powerUps {
+            if let powerUpCollision = powerUp.getComponent(ofType: CollisionComponent.self),
+               playerCollision.checkCollision(with: powerUpCollision) {
+                // Delegate the power-up effect to the player
+                player.applyPowerUp(powerUp)
+            
+                // Remove the collected power-up
+                powerUp.getComponent(ofType: RenderComponent.self)?.node.removeFromParent()
+                powerUps.removeAll { $0 === powerUp }
             }
         }
     }
@@ -408,6 +429,9 @@ extension GameScene: SpawnManagerDelegate {
     func didSpawnHealthPack(_ healthPack: HealthPackEntity) {
         healthPacks.append(healthPack)
     }
+    func didSpawnPowerUp(_ powerUp: PowerUpEntity) {
+        powerUps.append(powerUp)
+    }
 }
 
 extension GameScene {
@@ -428,5 +452,68 @@ extension GameScene {
 
         // Run the shake followed by resetting the position
         cameraNode.run(SKAction.sequence([shakeAction, resetPosition]))
+    }
+}
+
+extension GameScene {
+    func activateTimeSlow(duration: TimeInterval) {
+        let slowFactor: CGFloat = 0.75 // Slow down by 50%
+
+        // Slow down enemy, bullet, and projectile movements
+        for enemy in enemies {
+            if let movementComponent = enemy.getComponent(ofType: MovementComponent.self) {
+                movementComponent.velocity.dx *= slowFactor
+                movementComponent.velocity.dy *= slowFactor
+            }
+        }
+
+        for bullet in bullets {
+            if let movementComponent = bullet.getComponent(ofType: MovementComponent.self) {
+                movementComponent.velocity.dx *= slowFactor
+                movementComponent.velocity.dy *= slowFactor
+            }
+        }
+
+        for playerBullet in playerBullets {
+            if let movementComponent = playerBullet.getComponent(ofType: MovementComponent.self) {
+                movementComponent.velocity.dx *= slowFactor
+                movementComponent.velocity.dy *= slowFactor
+            }
+        }
+
+        // Add a visual overlay to indicate time is slowed
+        let overlay = SKShapeNode(rect: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+        overlay.fillColor = .black
+        overlay.alpha = 0.4
+        overlay.zPosition = 100 // Render above everything else
+        addChild(overlay)
+
+        // Restore normal speed after the duration
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
+            guard let self = self else { return }
+
+            for enemy in self.enemies {
+                if let movementComponent = enemy.getComponent(ofType: MovementComponent.self) {
+                    movementComponent.velocity.dx /= slowFactor
+                    movementComponent.velocity.dy /= slowFactor
+                }
+            }
+
+            for bullet in self.bullets {
+                if let movementComponent = bullet.getComponent(ofType: MovementComponent.self) {
+                    movementComponent.velocity.dx /= slowFactor
+                    movementComponent.velocity.dy /= slowFactor
+                }
+            }
+
+            for playerBullet in self.playerBullets {
+                if let movementComponent = playerBullet.getComponent(ofType: MovementComponent.self) {
+                    movementComponent.velocity.dx /= slowFactor
+                    movementComponent.velocity.dy /= slowFactor
+                }
+            }
+
+            overlay.removeFromParent()
+        }
     }
 }
